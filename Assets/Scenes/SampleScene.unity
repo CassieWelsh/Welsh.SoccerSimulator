@@ -97,7 +97,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 112000000, guid: e6e7c6f145953674f8ca9fc1b28bdf15, type: 2}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -322,7 +322,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2130475fa87c3d94fb8e805fdd796f62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  object: {fileID: 5268535473731250037, guid: 03c3a94cc688d1c40ab0c9f49235d749, type: 3}
+  GatePrefab: {fileID: 6920295460965071149, guid: 785550e8773a26f41b79bd82cabd903f, type: 3}
+  ScoreboardPrefab: {fileID: 5022081226869241358, guid: 13c4a584c44b1b44793e63707efa932c, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

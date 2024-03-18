@@ -1,17 +1,26 @@
 using System.Collections.Generic;
-using ObjectConstructors;
+using System.Linq;
+using Constructors;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class SceneGenerator : MonoBehaviour
 {
+    public GameObject GatePrefab;
+    public GameObject ScoreboardPrefab;
     private List<GameObject> _objects;
 
     private void Start()
     {
-        var _objectsToDraw = GenerateSceneExtensions.GetObjects();
-        _objects = new(_objectsToDraw.Length);
-        foreach (var obj in _objectsToDraw)
+        var objectsToDraw = GenerateSceneExtensions.GetObjects(GatePrefab, ScoreboardPrefab);
+        _objects = new(objectsToDraw.Length);
+        foreach (var obj in objectsToDraw)
             _objects.Add(obj.PrepareObject());
+
+        var player = _objects.First(go => go.name == "Player");
+        transform.parent = player.transform;
+        transform.position = new(0, 1.5f, -4f);
+        transform.rotation = new(0, 0f, 0f, 1);
     }
     /*
     private GameObject _go;
