@@ -6,17 +6,62 @@ using UnityEngine;
 public class BezierSurface : MonoBehaviour
 {
     public float radius = 1f;
-    public int numPoints = 20;
+    private int numPoints = 32;
 
-    public Vector3[] _controlPoints;
+    public Vector3[] _inputPoints;
+    private Vector3[] _controlPoints;
     private Vector3[] _generatedPoints;
+    private MeshFilter meshFilter;
 
     private void Start()
     {
+        meshFilter = gameObject.AddComponent<MeshFilter>();
+
+        _controlPoints = new Vector3[numPoints];
+
+        var t = 0f;
+        var tStep = 1f / _controlPoints.Length;
+        for (var i = 0; i < _controlPoints.Length; i++)
+        {
+            _controlPoints[i] = CalculateBezierPoint(
+                _inputPoints[0],
+                _inputPoints[1],
+                _inputPoints[2],
+                _inputPoints[3],
+                t
+            );
+            t += tStep;
+        }
+
+        GeneratePoints();
+        CreateMesh();
+    }
+
+    private void Update()
+    {
+        _controlPoints = new Vector3[numPoints];
+
+        var t = 0f;
+        var tStep = 1f / _controlPoints.Length;
+        for (var i = 0; i < _controlPoints.Length; i++)
+        {
+            _controlPoints[i] = CalculateBezierPoint(
+                _inputPoints[0],
+                _inputPoints[1],
+                _inputPoints[2],
+                _inputPoints[3],
+                t
+            );
+            t += tStep;
+        }
+
         GeneratePoints();
         CreateMesh();
 
-        var r = RotateCurve(_controlPoints, 400f);
+        /*
+        GeneratePoints();
+        CreateMesh();
+    */
     }
 
     // Метод для вращения криволинейной прямой вокруг оси Y
@@ -39,6 +84,23 @@ public class BezierSurface : MonoBehaviour
         return rotatedCurve;
     }
 
+    // Функция для вычисления точки кривой Безье для заданного значения t
+    static Vector3 CalculateBezierPoint(Vector3 P0, Vector3 P1, Vector3 P2, Vector3 P3, double t)
+    {
+        var u = 1 - t;
+        var tt = t * t;
+        var uu = u * u;
+        var uuu = uu * u;
+        var ttt = tt * t;
+
+        // Формула кривой Безье третьего порядка
+        var x = (float)(uuu * P0.x + 3 * uu * t * P1.x + 3 * u * tt * P2.x + ttt * P3.x);
+        var y = (float)(uuu * P0.y + 3 * uu * t * P1.y + 3 * u * tt * P2.y + ttt * P3.y);
+        var z = (float)(uuu * P0.z + 3 * uu * t * P1.z + 3 * u * tt * P2.z + ttt * P3.z);
+
+        return new(x, y, z);
+    }
+
     private void GeneratePoints()
     {
         _generatedPoints = new Vector3[numPoints * _controlPoints.Length];
@@ -56,33 +118,41 @@ public class BezierSurface : MonoBehaviour
         var mesh = new Mesh();
         mesh.vertices = _generatedPoints;
 
-        var triangles = new int[(numPoints - 1) * _controlPoints.Length * 6];
-        var index = 0;
-
+        var triangles = new List<int>();
         for (var i = 0; i < numPoints - 1; i++)
         {
-            for (var j = 0; j < _controlPoints.Length; j++)
+            for (var j = 0; j < _controlPoints.Length - 1; j++)
             {
-                triangles[index++] = i * _controlPoints.Length + j;
-                triangles[index++] = (i + 1) * _controlPoints.Length + j;
-                triangles[index++] = i * _controlPoints.Length + (j + 1) % _controlPoints.Length;
+                triangles.Add(i * _controlPoints.Length + j);
+                triangles.Add((i + 1) * _controlPoints.Length + j);
+                triangles.Add(i * _controlPoints.Length + (j + 1) % _controlPoints.Length);
 
-                triangles[index++] = i * _controlPoints.Length + (j + 1) % _controlPoints.Length;
-                triangles[index++] = (i + 1) * _controlPoints.Length + j;
-                triangles[index++] = (i + 1) * _controlPoints.Length + (j + 1) % _controlPoints.Length;
+                triangles.Add(i * _controlPoints.Length + (j + 1) % _controlPoints.Length);
+                triangles.Add((i + 1) * _controlPoints.Length + j);
+                triangles.Add(i * _controlPoints.Length + j);
+
+
+                triangles.Add(i * _controlPoints.Length + (j + 1) % _controlPoints.Length);
+                triangles.Add((i + 1) * _controlPoints.Length + j);
+                triangles.Add((i + 1) * _controlPoints.Length + (j + 1) % _controlPoints.Length);
+
+                triangles.Add((i + 1) * _controlPoints.Length + (j + 1) % _controlPoints.Length);
+                triangles.Add((i + 1) * _controlPoints.Length + j);
+                triangles.Add(i * _controlPoints.Length + (j + 1) % _controlPoints.Length);
+
                 /*
-                triangles[index++] = i * _controlPoints.Length + j;
-                triangles[index++] = (i + 1) * _controlPoints.Length + j;
-                triangles[index++] = i * _controlPoints.Length + (j + 1) % _controlPoints.Length;
+                triangles.Add(i * _controlPoints.Length + j);
+                triangles.Add((i + 1) * _controlPoints.Length + j);
+                triangles.Add(i * _controlPoints.Length + (j + 1) % _controlPoints.Length);
 
-                triangles[index++] = i * _controlPoints.Length + (j + 1) % _controlPoints.Length;
-                triangles[index++] = (i + 1) * _controlPoints.Length + j;
-                triangles[index++] = (i + 1) * _controlPoints.Length + (j + 1) % _controlPoints.Length;
+                triangles.Add(i * _controlPoints.Length + (j + 1) % _controlPoints.Length);
+                triangles.Add((i + 1) * _controlPoints.Length + j);
+                triangles.Add((i + 1) * _controlPoints.Length + (j + 1) % _controlPoints.Length);
                 */
             }
         }
 
-        mesh.triangles = triangles;
+        mesh.triangles = triangles.ToArray();
 
         var uv = new Vector2[_generatedPoints.Length];
         for (var i = 0; i < _generatedPoints.Length; i += 4)
@@ -93,9 +163,7 @@ public class BezierSurface : MonoBehaviour
             uv[i + 3] = new(1, 0);
         }
 
-        mesh.uv = uv; // Assign UV coordinates to the mesh
-
-
-        gameObject.AddComponent<MeshFilter>().mesh = mesh;
+        mesh.uv = uv;
+        meshFilter.mesh = mesh;
     }
 }
