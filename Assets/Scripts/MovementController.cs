@@ -7,7 +7,7 @@ public class MovementController : MonoBehaviour
 
     private Rigidbody rb;
 
-    void Start()
+    private void Start()
     {
         rb = gameObject.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation
@@ -16,7 +16,7 @@ public class MovementController : MonoBehaviour
         rb.freezeRotation = true; // Freezing rotation to prevent unwanted physics interactions
     }
 
-    void Update()
+    private void Update()
     {
         // Movement
         float moveInput = Input.GetAxis("Vertical");

@@ -23,6 +23,8 @@ public class SceneController : MonoBehaviour
 
     private void Start()
     {
+        Application.targetFrameRate = 75;
+
         var objectsToDraw = GenerateSceneExtensions.GetObjects(GatePrefab, ScoreboardPrefab);
         _objects = new(objectsToDraw.Length);
         foreach (var obj in objectsToDraw)
@@ -71,7 +73,7 @@ public class SceneController : MonoBehaviour
         UpdateCamera();
     }
 
-    void UpdateCamera()
+    private void UpdateCamera()
     {
         // Получаем текущее положение и вращение цели
         Vector3 targetPosition = _cameraTarget.position;
