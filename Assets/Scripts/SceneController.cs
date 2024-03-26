@@ -16,10 +16,12 @@ public class SceneController : MonoBehaviour
     public GameObject rain;
     private GameObject _light;
 
-    public float smoothSpeed = 0.125f; // Скорость интерполяции (задает, насколько быстро камера приближается к цели)
-    public Vector3 offset; // Смещение камеры относительно цели
-    public float rotationSpeed = 5.0f; // Скорость поворота камеры вокруг цели
+    public float smoothSpeed = 0.125f;
+    public Vector3 offset;
+    public float rotationSpeed = 5.0f;
     private Dictionary<CameraController.CameraState, GameObject> _cameraPositions;
+    private GameObject _sphere;
+    private GameObject _player;
 
     private void Start()
     {
@@ -30,8 +32,8 @@ public class SceneController : MonoBehaviour
         foreach (var obj in objectsToDraw)
             _objects.Add(obj.PrepareObject());
 
-        var player = _objects.First(go => go.name == "Player");
-        _cameraTarget = player.transform;
+        _player = _objects.First(go => go.name == "Player");
+        _cameraTarget = _player.transform;
 
         var top = new GameObject
         {
@@ -53,12 +55,13 @@ public class SceneController : MonoBehaviour
 
         CameraController.SetPositions(new()
         {
-            [CameraController.CameraState.Player] = player,
+            [CameraController.CameraState.Player] = _player,
             [CameraController.CameraState.Top] = top,
             [CameraController.CameraState.Alongside] = alongside
         });
 
         _light = GameObject.Find("Light");
+        _sphere = _objects.First(go => go.name == "Sphere");
     }
 
     private void Update()
@@ -66,6 +69,51 @@ public class SceneController : MonoBehaviour
         WeatherController.RefreshWeather(rain, _light);
         if (Input.GetKeyDown(KeyCode.J))
             _cameraTarget = CameraController.NextCameraPosition();
+
+        if (Input.GetKey(KeyCode.U))
+            _light.transform.Rotate(Vector3.up, 1f);
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            var isPlayer = _player.GetComponent<MovementController>().enabled;
+            if (isPlayer)
+            {
+                _player.GetComponent<MovementController>().enabled = false;
+                _player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+
+                _sphere.GetComponent<MovementController>().enabled = true;
+                _sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation
+                                                                | RigidbodyConstraints.FreezeRotationZ
+                                                                | RigidbodyConstraints.FreezePositionY;
+                var rotation = _sphere.transform.rotation;
+                rotation.x = rotation.z = 0f;
+                _sphere.transform.rotation = rotation;
+                var position = _sphere.transform.position;
+                position.y = 1;
+                _sphere.transform.position = position;
+
+                _cameraTarget = _sphere.transform;
+            }
+            else
+            {
+                _sphere.GetComponent<MovementController>().enabled = false;
+                _sphere.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+
+                _player.GetComponent<MovementController>().enabled = true;
+                _player.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation
+                                                                | RigidbodyConstraints.FreezeRotationZ
+                                                                | RigidbodyConstraints.FreezePositionY;
+
+                var rotation = _player.transform.rotation;
+                rotation.x = rotation.z = 0f;
+                _player.transform.rotation = rotation;
+                var position = _player.transform.position;
+                position.y = 1;
+                _player.transform.position = position;
+
+                _cameraTarget = _player.transform;
+            }
+        }
     }
 
     private void FixedUpdate()

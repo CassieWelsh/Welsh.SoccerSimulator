@@ -8,4 +8,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/Revolute.unity
+    guid: c483124f379a8e0488bbc2ad94e2c4c5
+  - enabled: 1
+    path: Assets/Scenes/Fractal.unity
+    guid: 292fd49e0019a904387c726a1d18da53
+  - enabled: 1
+    path: Assets/Scenes/Credits.unity
+    guid: 286e5bb0005aa03499f9f655487dc4cf
   m_configObjects: {}

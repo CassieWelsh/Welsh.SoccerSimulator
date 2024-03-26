@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Constructors
@@ -7,6 +8,8 @@ namespace Constructors
         public GameObject PrepareObject()
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            var movement = go.AddComponent<MovementController>();
+            movement.enabled = false;
             ChangePosition(go);
             AddRigidbody(go);
             ApplyTexture(go);

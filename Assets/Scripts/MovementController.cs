@@ -9,7 +9,8 @@ public class MovementController : MonoBehaviour
 
     private void Start()
     {
-        rb = gameObject.AddComponent<Rigidbody>();
+        gameObject.AddComponent<Rigidbody>();
+        rb = gameObject.GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation
                          | RigidbodyConstraints.FreezeRotationZ
                          | RigidbodyConstraints.FreezePositionY;
